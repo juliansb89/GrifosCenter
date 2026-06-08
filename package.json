@@ -1,16 +1,25 @@
 {
-  "name": "grifoscenter_node",
+  "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Servidor para Grifos Center",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "dev": "node index.js"
+    "dev": "node index.js",
+    "test": "jest"
   },
   "keywords": [],
-  "author": "",
+  "author": "Julian Sanchez",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^5.2.1",
-    "mysql2": "^3.20.0"
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.2",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2"
   }
 }

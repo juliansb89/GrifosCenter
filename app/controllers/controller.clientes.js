@@ -1,106 +1,66 @@
 import pool from '../config/db.js';
 
-// Obtener todos los clientes
-export const listarUsuarios = async (req, res) => {
+// 1. Obtener todos los clientes (GET /api/clientes)
+export const getClientes = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM clientes');
-        res.json(rows);
+        const [clientes] = await pool.query('SELECT * FROM clientes');
+        res.status(200).json(clientes);
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener los datos' });
+        res.status(500).json({ message: 'Error al obtener clientes', error: error.message });
     }
 };
 
-export const obtenerUsuario = async (req, res) => {
+// 2. Obtener un cliente por su ID (GET /api/clientes/:id)
+export const getClienteById = async (req, res) => {
     try {
-        // 1. Capturamos el id que viene en la URL
         const { id } = req.params;
-
-        // 2. Hacemos la consulta a TU tabla 'clientes' usando TU columna 'Id_cliente'
-        const [rows] = await pool.query(
-            'SELECT * FROM clientes WHERE Id_cliente = ?',
-            [id]
-        );
-
-        // 3. Si no hay resultados, avisamos que el cliente no existe
-        if (rows.length === 0) {
-            return res.status(404).json({ error: 'Cliente no encontrado' });
+        const [cliente] = await pool.query('SELECT * FROM clientes WHERE Id_cliente = ?', [id]);
+        
+        if (cliente.length === 0) {
+            return res.status(404).json({ message: 'Cliente no encontrado' });
         }
-
-        // 4. Si lo encuentra, enviamos solo los datos de ese cliente
-        res.json(rows[0]);
-
+        res.status(200).json(cliente[0]);
     } catch (error) {
-        // En caso de error de conexión o base de datos
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: 'Error al buscar el cliente', error: error.message });
     }
 };
 
-export const crearUsuario = async (req, res) => {
-    // 1. Extraemos los datos que enviaremos desde el cuerpo (body) de la petición
-    const { Nombres, correo, Direccion, celular } = req.body;
-    
+// 3. Crear un cliente nuevo (POST /api/clientes)
+export const crearCliente = async (req, res) => {
     try {
-        // 2. Ejecutamos el INSERT con tus 4 campos
-        const [result] = await pool.query(
-            'INSERT INTO clientes (Nombres, correo, Direccion, celular) VALUES (?, ?, ?, ?)',
-            [Nombres, correo, Direccion, celular]
-        );
-
-        // 3. Respondemos con un código 201 (Creado) y los datos que acabamos de insertar
-        res.status(201).json({
-            id: result.insertId,
-            Nombres,
-            correo,
-            Direccion,
-            celular
-        });
-
-    } catch (error) {
-        // Si hay un error (por ejemplo, falta un dato), avisamos
-        res.status(500).json({ error: error.message });
-    }
-};
-
-export const actualizarUsuario = async (req, res) => {
-    try {
-        const { id } = req.params; // Sacamos el ID de la URL
-        const { Nombres, correo, Direccion, celular } = req.body; // Sacamos los nuevos datos del body
-
+        const { nombre_completo, email, password, telefono, direccion } = req.body;
         await pool.query(
-            'UPDATE clientes SET Nombres = ?, correo = ?, Direccion = ?, celular = ? WHERE Id_cliente = ?',
-            [Nombres, correo, Direccion, celular, id]
+            'INSERT INTO clientes (nombre_completo, email, password, telefono, direccion) VALUES (?, ?, ?, ?, ?)',
+            [nombre_completo, email, password, telefono, direccion]
         );
-
-        res.json({ message: 'Cliente actualizado correctamente' });
-
+        res.status(201).json({ message: 'Cliente creado con éxito' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ message: 'Error al crear cliente', error: error.message });
     }
 };
 
-// Función para eliminar un cliente
-export const eliminarUsuario = async (req, res) => {
+// 4. Modificar un cliente (PUT /api/clientes/:id)
+export const actualizarCliente = async (req, res) => {
     try {
-        // 1. Obtenemos el ID de la URL
         const { id } = req.params;
-
-        // 2. Ejecutamos la eliminación en la base de datos
-        // Usamos Id_cliente porque así lo tienes en tu tabla
-        const [result] = await pool.query(
-            'DELETE FROM clientes WHERE Id_cliente = ?', 
-            [id]
+        const { nombre_completo, email, telefono, direccion } = req.body;
+        await pool.query(
+            'UPDATE clientes SET nombre_completo = ?, email = ?, telefono = ?, direccion = ? WHERE Id_cliente = ?',
+            [nombre_completo, email, telefono, direccion, id]
         );
-
-        // 3. ¡ESTO ES LO QUE FALTABA! 
-        // Enviamos una respuesta al cliente (Thunder Client) para que no se quede cargando
-        if (result.affectedRows > 0) {
-            res.json({ message: `Cliente con ID ${id} eliminado con éxito` });
-        } else {
-            res.status(404).json({ message: "No se encontró el cliente para eliminar" });
-        }
-
+        res.status(200).json({ message: 'Cliente actualizado con éxito' });
     } catch (error) {
-        // Si algo falla, avisamos qué pasó
-        res.status(500).json({ error: "Error en el servidor: " + error.message });
+        res.status(500).json({ message: 'Error al actualizar el cliente', error: error.message });
+    }
+};
+
+// 5. Eliminar un cliente (DELETE /api/clientes/:id)
+export const eliminarCliente = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM clientes WHERE Id_cliente = ?', [id]);
+        res.status(200).json({ message: 'Cliente eliminado con éxito' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al eliminar cliente', error: error.message });
     }
 };

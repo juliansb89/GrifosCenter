@@ -1,13 +1,13 @@
-import mysql from 'mysql2/promise';
+import mysql from 'mysql2/promise'; // Aquí agregamos /promise
 
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '', // En XAMPP usualmente va vacío
-  database: 'grifos_center', // Este es el nombre real de tu DB
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+    host: 'localhost',
+    user: 'root',
+    password: 'Js891206',
+    database: 'grifos center',
+    port: 3307,
 });
+
+console.log('✅ Conectado a la Base de Datos grifos center (Promesas activas)');
 
 export default pool;
